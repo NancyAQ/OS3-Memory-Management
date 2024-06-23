@@ -700,3 +700,17 @@ unmap_shared_pages(struct proc* p, uint64 addr,uint64 size){
   //TO DO
   return 0;
 }
+struct proc*
+find_proc(int pid){ //temp impl
+    struct proc *p;
+    for(p = proc; p < &proc[NPROC]; p++) {
+      acquire(&p->lock);
+      if(p->pid==pid){
+        return p;
+      }
+      else{
+      release(&p->lock);
+      }
+    }
+    return 0;
+}

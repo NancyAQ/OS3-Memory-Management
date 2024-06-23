@@ -110,7 +110,8 @@ int             either_copyin(void *dst, int user_src, uint64 src, uint64 len);
 void            procdump(void);
 //Added for Assignment 3
 uint64          map_shared_pages(struct proc* ,struct proc* ,uint64,uint64);
-uint64          unmap_shared_pages(struct proc*,uint64,uint64);   
+uint64          unmap_shared_pages(struct proc*,uint64,uint64); 
+struct proc*    find_proc(int) ; 
 
 
 // shmem_queue.c
