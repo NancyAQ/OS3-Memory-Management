@@ -715,7 +715,25 @@ map_shared_pages(struct proc* src_proc,struct proc* dst_proc,uint64 src_va,uint6
 
 uint64
 unmap_shared_pages(struct proc* p, uint64 addr,uint64 size){
-  //TO DO
+  //alligning
+  addr=PGROUNDDOWN(addr);
+  size=PGROUNDUP(size);
+  uint64 npages=size/PGSIZE;
+  pte_t *pte;
+  if((pte=walk(p->pagetable,addr,size))==0){
+    panic("not valid pte");
+    return -1;
+  }
+  if((*pte&PTE_V)==0){
+    panic("page doent exist");
+    return -1;
+  }
+  if(((*pte&PTE_S)==0)){
+    panic("Not shared mapping");
+    return -1;
+  }
+  uvmunmap(p->pagetable,addr,npages,1);
+  p->sz=p->sz-size;
   return 0;
 }
 struct proc*
