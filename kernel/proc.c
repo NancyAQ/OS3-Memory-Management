@@ -688,3 +688,15 @@ procdump(void)
     printf("\n");
   }
 }
+//Assignment 3 functionn implementation
+uint64
+map_shared_pages(struct proc* src_proc,struct proc* dst_proc,uint64 src_va,uint64 size){
+  //TO DO
+  return 0;
+}
+
+uint64
+unmap_shared_pages(struct proc* p, uint64 addr,uint64 size){
+  //TO DO
+  return 0;
+}
