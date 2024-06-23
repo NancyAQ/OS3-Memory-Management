@@ -726,30 +726,67 @@ map_shared_pages(struct proc* src_proc,struct proc* dst_proc,uint64 src_va,uint6
   dst_proc->sz=a;
   return a-added; //new addr - added size=start of mapping
 }
-
 uint64
 unmap_shared_pages(struct proc* p, uint64 addr,uint64 size){
-  //alligning
-  addr=PGROUNDDOWN(addr);
-  size=PGROUNDUP(size);
-  uint64 npages=size/PGSIZE;
-  pte_t *pte;
-  if((pte=walk(p->pagetable,addr,size))==0){
-    panic("not valid pte");
-    return -1;
-  }
-  if((*pte&PTE_V)==0){
-    panic("page doent exist");
-    return -1;
-  }
-  if(((*pte&PTE_S)==0)){
-    panic("Not shared mapping");
-    return -1;
-  }
-  uvmunmap(p->pagetable,addr,npages,1);
-  p->sz=p->sz-size;
-  return 0;
+  //alligning va and size
+  uint64 first_page_va= PGROUNDDOWN(addr);
+  uint64 last_page_va= PGROUNDUP(size+addr);
+  // uint64 added=last_page_va-first_page_va;
+  // uint64 npages=(last_page_va-first_page_va)/(PGSIZE);
+  // uint64 a;
+  // a=PGROUNDUP(p->sz); //is rounding up needed?
+  uint curr_va;
+  //iterate over pages, find their pa using walk then map
+  for(curr_va=first_page_va;curr_va<last_page_va;curr_va=curr_va+PGSIZE){
+    pte_t *pte;
+    if((pte = walk(p->pagetable,curr_va,0)) == 0){
+      panic("No such page");
+      return -1;
+    }
+    //correctness
+    if((*pte & PTE_V)==0){
+      panic("Not a valid address");
+      return -1;
+    }
+    if((*pte & PTE_S)==0){
+      panic("not a shared space");
+      return -1;
+    }
+    uvmunmap(p->pagetable,curr_va,1,1);
+  } 
+  //update size and return va for source
+  // dst_proc->sz=a; //what to update proc size to?  hmm
+
+   return 0;
 }
+
+
+// uint64
+// unmap_shared_pages(struct proc* p, uint64 addr,uint64 size){
+//   //alligning
+//   addr=PGROUNDDOWN(addr);
+//   size=PGROUNDUP(size);
+//   uint64 npages=size/PGSIZE;
+//   for(int i=0;i<npages;i++){
+//     pte_t *pte;
+//     addr=addr+i*PGSIZE;
+//     if((pte=walk(p->pagetable,addr,size))==0){
+//       panic("not valid pte");
+//       return -1;
+//   }  
+//     if((*pte&PTE_V)==0){
+//       panic("page doesnt exist");
+//       return -1;
+//     }
+//     if(((*pte&PTE_S)==0)){
+//       panic("Not shared mapping");
+//       return -1;
+//     } 
+//     uvmunmap(p->pagetable,addr,1,1);
+//   }
+//   p->sz=p->sz-size;
+//   return 0;
+// }
 struct proc*
 find_proc(int pid){ //temp impl
     struct proc *p;
