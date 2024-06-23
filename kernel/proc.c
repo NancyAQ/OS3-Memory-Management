@@ -691,8 +691,26 @@ procdump(void)
 //Assignment 3 functionn implementation
 uint64
 map_shared_pages(struct proc* src_proc,struct proc* dst_proc,uint64 src_va,uint64 size){
-  //TO DO
-  return 0;
+  pte_t *pte;
+  src_va=PGROUNDDOWN(src_va);
+  size=PGROUNDUP(size);
+  if((pte=walk(src_proc->pagetable,src_va,size))==0){
+    panic("not valid pte");
+  }
+  if((*pte&PTE_V)==0){
+    panic("page doent exist");
+  }
+  if(((*pte&PTE_U)==0)){
+    panic("page not user accessible");
+  }
+  uint64 pa = PTE2PA(*pte); //physical address
+  uint64 a=dst_proc->sz+size-1;
+  uint flags;
+  flags = PTE_FLAGS(*pte);
+  flags|=PTE_S; //added shared flag
+  mappages(dst_proc->pagetable,a,size,pa,flags);
+  dst_proc->sz=dst_proc->sz+size;
+  return a;
 }
 
 uint64
