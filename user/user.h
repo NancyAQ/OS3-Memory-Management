@@ -27,8 +27,8 @@ int crypto_op(struct crypto_op*, int);
 int take_shared_memory_request(void**, uint64*);
 int remove_shared_memory_request(void*, uint64);
 //Added for Assignment 3 Task 1, args and returns to be decided
-int map_shared_pages(void);
-int unmap_shared_pages(void);
+uint64 map_shared_pages(int,uint64,uint64);
+int unmap_shared_pages(uint64,uint64);
 
 
 // ulib.c
