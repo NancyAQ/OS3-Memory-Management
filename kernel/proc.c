@@ -688,44 +688,29 @@ procdump(void)
     printf("\n");
   }
 }
-//Assignment 3 functionn implementation
+
 uint64
 map_shared_pages(struct proc* src_proc,struct proc* dst_proc,uint64 src_va,uint64 size){
-  //alligning va and size
-  uint64 first_page_va= PGROUNDDOWN(src_va);
-  uint64 last_page_va= PGROUNDUP(size+src_va);
-  uint64 added=last_page_va-first_page_va;
-  uint64 a;
-  a=PGROUNDUP(dst_proc->sz); //is rounding up needed?
-  uint curr_va;
-  //iterate over pages, find their pa using walk then map
-  for(curr_va=first_page_va;curr_va<last_page_va;curr_va=curr_va+PGSIZE){
-    pte_t *pte;
-    if((pte = walk(src_proc->pagetable,curr_va,0)) == 0){
-      panic("No such page");
-      return -1;
-    }
-    //correctness
-    if((*pte & PTE_V)==0){
-      panic("Not a valid address");
-      return -1;
-    }
-    if((*pte & PTE_U)==0){
-      panic("not accessible to user");
-      return -1;
-    }
-    uint64 pa=PTE2PA(*pte);
-    uint flags;
-    flags = PTE_FLAGS(*pte);
-    flags|=PTE_S; //added shared flag
-    //map to destination
-    mappages(dst_proc->pagetable,a,PGSIZE,pa,flags);// should I add sanity checks here?
-    a=a+PGSIZE;
-  } 
-  //update size and return va for source
-  dst_proc->sz=a;
-  return a-added; //new addr - added size=start of mapping
+  //alligning
+  uint64 va=PGROUNDUP(dst_proc->sz); 
+  uint64 off_set=(src_va-PGROUNDDOWN(src_va));
+  size=PGROUNDUP(size+off_set); //allign size by offset
+  src_va=PGROUNDDOWN(src_va);
+  pte_t *pte;
+  pte=walk(src_proc->pagetable,src_va,0);
+  if(pte==0){
+    panic("Walk Failed");
+  }
+  if((*pte & PTE_V) == 0)
+    panic("Not valid");
+  if((*pte & PTE_U) == 0)
+    panic("Not user accessible");
+  uint64 pa= PTE2PA(*pte);
+  mappages(dst_proc->pagetable,va,size,pa,PTE_FLAGS(*pte)|PTE_S); 
+  dst_proc->sz=va+size; 
+  return va+off_set;
 }
+
 uint64
 unmap_shared_pages(struct proc* p, uint64 addr,uint64 size){
   //alligning va and size
@@ -760,13 +745,9 @@ unmap_shared_pages(struct proc* p, uint64 addr,uint64 size){
 struct proc*
 find_proc(int pid){ //temp impl
     struct proc *p;
-    for(p = proc; p < &proc[NPROC]; p++) {
-      acquire(&p->lock);
+    for(p = proc; p < &proc[NPROC]; p++) { //no need to acquire
       if(p->pid==pid){
         return p;
-      }
-      else{
-      release(&p->lock);
       }
     }
     return 0;

@@ -93,12 +93,12 @@ uint64 sys_map_shared_pages(void){ //to do
   int pid;
   argint(0,&pid);
   struct proc *p;
-  p=find_proc(pid);
+  p=find_proc(pid); //this should be the src?
   uint64 va;
   argaddr(1,&va);
   uint64 size;
   argaddr(2,&size);
-  return map_shared_pages(myproc(),p,va,size);
+  return map_shared_pages(p,myproc(),va,size);
 }
 uint64 sys_unmap_shared_pages(void){ //to do
   uint64 va;
