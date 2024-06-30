@@ -721,7 +721,7 @@ unmap_shared_pages(struct proc* p, uint64 addr,uint64 size){
   //sanity checks
   pte_t *pte;
   pte=walk(p->pagetable,va,0);
-  if((*pte & PTE_S) == 0)
+  if((*pte & PTE_S) == 0||(*pte & PTE_V) == 0)
     return 1;
   uvmunmap(p->pagetable,va,npages,0);
   //size updates
