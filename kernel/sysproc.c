@@ -106,6 +106,8 @@ uint64 sys_unmap_shared_pages(void){ //to do
   uint64 size;
   argaddr(1,&size);
   return unmap_shared_pages(myproc(),va,size);
-
+}
+uint64 sys_get_size(void){
+  return myproc()->sz;
 }
 

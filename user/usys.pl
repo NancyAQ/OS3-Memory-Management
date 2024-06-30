@@ -41,3 +41,4 @@ entry("map_shared_pages");
 entry("unmap_shared_pages");
 entry("take_shared_memory_request");
 entry("remove_shared_memory_request");
+entry("get_size");
