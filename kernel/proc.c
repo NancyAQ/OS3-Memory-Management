@@ -693,11 +693,12 @@ uint64
 map_shared_pages(struct proc* src_proc,struct proc* dst_proc,uint64 src_va,uint64 size){
   //alligning
   uint64 va=PGROUNDUP(dst_proc->sz); 
-  uint64 off_set=(src_va-PGROUNDDOWN(src_va));
-  size=PGROUNDUP(size+off_set); //allign size by offset
+  uint64 off_set=src_va-(PGROUNDDOWN(src_va));
+  size=PGROUNDUP(size+off_set); //allign size by offset(offsetm kinda unused page mem)
   src_va=PGROUNDDOWN(src_va);
   pte_t *pte;
   pte=walk(src_proc->pagetable,src_va,0);
+  //sanity checks
   if(pte==0){
     panic("Walk Failed");
   }
@@ -712,34 +713,21 @@ map_shared_pages(struct proc* src_proc,struct proc* dst_proc,uint64 src_va,uint6
 }
 
 uint64
-unmap_shared_pages(struct proc* p, uint64 addr,uint64 size){
-  //alligning va and size
-  uint64 first_page_va= PGROUNDDOWN(addr);
-  uint64 last_page_va= PGROUNDUP(size+addr);
-  uint curr_va;
-  //iterate over pages, find their pa using walk then map
-  for(curr_va=first_page_va;curr_va<last_page_va;curr_va=curr_va+PGSIZE){
-    pte_t *pte;
-    if((pte = walk(p->pagetable,curr_va,0)) == 0){
-      panic("No such page");
-      return -1;
-    }
-    //correctness
-    if((*pte & PTE_V)==0){
-      panic("Not a valid address");
-      return -1;
-    }
-    if((*pte & PTE_S)==0){
-      panic("not a shared space");
-      return -1;
-    }
-    uvmunmap(p->pagetable,curr_va,1,1);
-  } 
-  //update size and return va for source need to rethink this
-  if(p->sz==last_page_va){
-    p->sz=PGROUNDDOWN(addr);
-  }
-   return 0;
+unmap_shared_pages(struct proc* p, uint64 addr,uint64 size){ 
+  uint64 va= PGROUNDDOWN(addr);
+  uint64 offset=addr-va;
+  size=PGROUNDUP(size+offset);
+  uint64 npages=size/PGSIZE ;
+  //sanity checks
+  pte_t *pte;
+  pte=walk(p->pagetable,va,0);
+  if((*pte & PTE_S) == 0)
+    return 1;
+  uvmunmap(p->pagetable,va,npages,0);
+  //size updates
+  p->sz=p->sz-(size);
+  return 0;
+  
 }
 
 struct proc*
