@@ -15,6 +15,8 @@ main(int argc, char **argv)
     char * papa_calling=(char*) new_va;
     printf("papa is calling: %s\n",papa_calling);
     sleep(3);
+    int value=unmap_shared_pages((uint64)papa_calling,12);
+    printf("unmapping result is %d\n",value);
     exit(0);
   }
   else{ 
