@@ -691,7 +691,6 @@ procdump(void)
 
 uint64
 map_shared_pages(struct proc* src_proc,struct proc* dst_proc,uint64 src_va,uint64 size){
-  printf("Size before mapping is %d\n",dst_proc->sz);
   //alligning
   uint64 va=PGROUNDUP(dst_proc->sz); 
   uint64 off_set=src_va-(PGROUNDDOWN(src_va));
@@ -710,7 +709,6 @@ map_shared_pages(struct proc* src_proc,struct proc* dst_proc,uint64 src_va,uint6
   uint64 pa= PTE2PA(*pte);
   mappages(dst_proc->pagetable,va,size,pa,PTE_FLAGS(*pte)|PTE_S); 
   dst_proc->sz=va+size; 
-  printf("Size before mapping is %d\n",dst_proc->sz);
   return va+off_set;
 }
 
@@ -728,7 +726,6 @@ unmap_shared_pages(struct proc* p, uint64 addr,uint64 size){
   uvmunmap(p->pagetable,va,npages,0);
   //size updates
   p->sz=p->sz-(size);
-  printf("Size after unmapping is %d\n",p->sz);
   return 0;
   
 }

@@ -81,7 +81,6 @@ malloc(uint nbytes)
         p->s.size = nunits;
       }
       freep = prevp;
-      printf("malloc added: %d\n",nbytes + sizeof(Header) - 1); //need to reconsider
       return (void*)(p + 1);
     }
     if(p == freep)
