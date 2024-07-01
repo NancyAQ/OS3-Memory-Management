@@ -29,7 +29,6 @@ int remove_shared_memory_request(void*, uint64);
 //Added for Assignment 3 Task 1, args and returns to be decided
 uint64 map_shared_pages(int,uint64,uint64);
 int unmap_shared_pages(uint64,uint64);
-int get_size(void);
 
 
 // ulib.c
