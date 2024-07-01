@@ -94,6 +94,7 @@ uint64 sys_map_shared_pages(void){ //to do
   argint(0,&pid);
   struct proc *p;
   p=find_proc(pid); //this should be the src?
+  release(&p->lock);
   uint64 va;
   argaddr(1,&va);
   uint64 size;

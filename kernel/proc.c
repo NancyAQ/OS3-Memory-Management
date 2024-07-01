@@ -737,9 +737,11 @@ struct proc*
 find_proc(int pid){ //temp impl
     struct proc *p;
     for(p = proc; p < &proc[NPROC]; p++) { //no need to acquire
+      acquire(&p->lock);
       if(p->pid==pid){
         return p;
       }
+      release(&p->lock);
     }
     return 0;
 }
