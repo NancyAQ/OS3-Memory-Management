@@ -731,9 +731,9 @@ unmap_shared_pages(struct proc* p, uint64 addr,uint64 size){
 }
 
 struct proc*
-find_proc(int pid){ //temp impl
+find_proc(int pid){
     struct proc *p;
-    for(p = proc; p < &proc[NPROC]; p++) { //no need to acquire
+    for(p = proc; p < &proc[NPROC]; p++) { 
       acquire(&p->lock);
       if(p->pid==pid){
         return p;

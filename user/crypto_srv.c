@@ -26,10 +26,10 @@ int main(void) {
     void *mapped_request_va;
     uint64 request_size;
     if(take_shared_memory_request(&mapped_request_va,&request_size)==0){
-        struct crypto_op* processed_op=( struct crypto_op*)mapped_request_va;
-        //sanity checks
+        struct crypto_op* processed_op=(struct crypto_op*)mapped_request_va;
+        //sanity checks(in addition to size sanity checks)
         if(processed_op->state!=CRYPTO_OP_STATE_INIT || (processed_op->type!=CRYPTO_OP_TYPE_DECRYPT 
-        && processed_op->type!=CRYPTO_OP_TYPE_ENCRYPT) ){
+        && processed_op->type!=CRYPTO_OP_TYPE_ENCRYPT)||(processed_op->data_size==0)||(processed_op->key_size==0) ){
             asm volatile ("fence rw,rw" : : : "memory");
             processed_op->state=CRYPTO_OP_STATE_ERROR;
         }
