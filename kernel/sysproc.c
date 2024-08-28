@@ -89,19 +89,21 @@ sys_uptime(void)
   release(&tickslock);
   return xticks;
 }
-uint64 sys_map_shared_pages(void){ //to do
+uint64 sys_map_shared_pages(void){ 
   int pid;
   argint(0,&pid);
   struct proc *p;
-  p=find_proc(pid); //this should be the src?
-  release(&p->lock);
+  p=find_proc(pid);
   uint64 va;
   argaddr(1,&va);
   uint64 size;
   argaddr(2,&size);
-  return map_shared_pages(p,myproc(),va,size);
+  uint64 return_val= map_shared_pages(p,myproc(),va,size);
+  release(&p->lock); //safely releasing proc
+  return return_val;
+
 }
-uint64 sys_unmap_shared_pages(void){ //to do
+uint64 sys_unmap_shared_pages(void){ 
   uint64 va;
   argaddr(0,&va);
   uint64 size;
